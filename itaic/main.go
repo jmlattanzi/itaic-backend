@@ -74,10 +74,10 @@ func main() {
 	router.HandleFunc(pat.Put("/posts/like/:id/:uid"), pc.HandleLikePost(ctx, client, ch, q))
 
 	// comment routes
-	router.HandleFunc(pat.Post("/comment/:id"), cc.HandleAddComment(ctx, client))
-	router.HandleFunc(pat.Delete("/comment/:id/:comment"), cc.HandleDeleteComment(ctx, client))
-	router.HandleFunc(pat.Put("/comment/:id/:comment"), cc.HandleEditComment(ctx, client))
-	router.HandleFunc(pat.Put("/comment/like/:post_id/:id/:uid"), cc.HandleLikeComment(ctx, client))
+	router.HandleFunc(pat.Post("/comment/:id"), cc.HandleAddComment(ctx, client, ch, q))
+	router.HandleFunc(pat.Delete("/comment/:id/:comment"), cc.HandleDeleteComment(ctx, client, ch, q))
+	router.HandleFunc(pat.Put("/comment/:id/:comment"), cc.HandleEditComment(ctx, client, ch, q))
+	router.HandleFunc(pat.Put("/comment/like/:post_id/:id/:uid"), cc.HandleLikeComment(ctx, client, ch, q))
 
 	// user routes
 	router.HandleFunc(pat.Get("/user/:uid"), uc.HandleGetUser(ctx, client))

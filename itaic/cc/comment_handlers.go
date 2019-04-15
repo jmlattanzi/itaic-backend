@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/streadway/amqp"
+
 	shortid "github.com/jasonsoft/go-short-id"
 	"google.golang.org/api/iterator"
 
@@ -18,7 +20,7 @@ import (
 )
 
 // HandleAddComment ... Adds a comment to the db
-func HandleAddComment(ctx context.Context, client *firestore.Client) func(res http.ResponseWriter, req *http.Request) {
+func HandleAddComment(ctx context.Context, client *firestore.Client, ch *amqp.Channel, q amqp.Queue) func(res http.ResponseWriter, req *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
 		res.Header().Set("Content-Type", "application/json")
 
@@ -86,12 +88,14 @@ func HandleAddComment(ctx context.Context, client *firestore.Client) func(res ht
 			log.Fatal("[ ! ] Error setting document: ", err)
 		}
 
+		sendMessage(ch, q, id)
+
 		json.NewEncoder(res).Encode(currentPost)
 	}
 }
 
 // HandleDeleteComment ... Deletes a comment based on post id and comment id
-func HandleDeleteComment(ctx context.Context, client *firestore.Client) func(res http.ResponseWriter, req *http.Request) {
+func HandleDeleteComment(ctx context.Context, client *firestore.Client, ch *amqp.Channel, q amqp.Queue) func(res http.ResponseWriter, req *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
 		res.Header().Set("Content-Type", "application/json")
 
@@ -123,12 +127,15 @@ func HandleDeleteComment(ctx context.Context, client *firestore.Client) func(res
 		if err != nil {
 			log.Fatal("[ ! ] Error setting document: ", err)
 		}
+
+		sendMessage(ch, q, id)
+
 		json.NewEncoder(res).Encode(currentPost)
 	}
 }
 
 // HandleEditComment ... Edits a comment and submits to the db
-func HandleEditComment(ctx context.Context, client *firestore.Client) func(res http.ResponseWriter, req *http.Request) {
+func HandleEditComment(ctx context.Context, client *firestore.Client, ch *amqp.Channel, q amqp.Queue) func(res http.ResponseWriter, req *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
 		res.Header().Set("Content-Type", "application/json")
 
@@ -171,12 +178,15 @@ func HandleEditComment(ctx context.Context, client *firestore.Client) func(res h
 		if err != nil {
 			log.Fatal("[ ! ] Error setting document: ", err)
 		}
+
+		sendMessage(ch, q, id)
+
 		json.NewEncoder(res).Encode(currentPost)
 	}
 }
 
 //HandleLikeComment ... Handles liking a comment
-func HandleLikeComment(ctx context.Context, client *firestore.Client) func(res http.ResponseWriter, req *http.Request) {
+func HandleLikeComment(ctx context.Context, client *firestore.Client, ch *amqp.Channel, q amqp.Queue) func(res http.ResponseWriter, req *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
 		res.Header().Set("Content-Type", "application/json")
 
@@ -240,12 +250,9 @@ func HandleLikeComment(ctx context.Context, client *firestore.Client) func(res h
 			log.Fatal("[ ! ] Error updating post: ", err)
 		}
 
-		json.NewEncoder(res).Encode(&post)
+		sendMessage(ch, q, postID)
 
-		// find the comment
-		// check if the user has already liked itaic
-		// if yes, remove the comment from their likes and decrement comment likes
-		// if no, add comment to their likes and increment comment like
+		json.NewEncoder(res).Encode(&post)
 	}
 }
 
@@ -257,4 +264,22 @@ func remove(likes []string, id string) (bool, int) {
 		}
 	}
 	return false, 0
+}
+
+func sendMessage(ch *amqp.Channel, q amqp.Queue, id string) {
+	body := id
+	err := ch.Publish(
+		"",
+		q.Name,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Type:        "UPDATE",
+			Body:        []byte(body),
+		})
+	if err != nil {
+		log.Fatal("[ ! ] Error publishing message")
+	}
+	fmt.Println("[ + ] Message sent")
 }
