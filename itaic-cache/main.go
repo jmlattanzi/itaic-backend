@@ -51,7 +51,7 @@ func main() {
 	router.HandleFunc(pat.Get("/posts"), HandleGetAllPosts(client))
 	router.HandleFunc(pat.Get("/posts/:id"), HandleGetPostByID(client))
 
-	MQConsumer(client)
+	go MQConsumer(client)
 	http.ListenAndServe(":5000", handlers.LoggingHandler(os.Stdout, router))
 }
 
