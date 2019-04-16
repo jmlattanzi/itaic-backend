@@ -1,11 +1,11 @@
 version: '3'
 services:
-  # redis:
-  #   container_name: cache
-  #   image: redis
-  #   networks:
-  #     itaic:
-  #       ipv4_address: 176.24.0.13
+  redis:
+    container_name: cache
+    image: redis
+    networks:
+      itaic:
+        ipv4_address: 176.24.0.13
   cache-api:
     container_name: cache-api
     image: itaic-cache
@@ -15,14 +15,14 @@ services:
       - '5000:5000'
     depends_on:
       - db-api
-  # rabbitmq:
-  #   container_name: queue
-  #   image: rabbitmq
-  #   networks:
-  #     itaic:
-  #       ipv4_address: 176.24.0.9
-  #   ports:
-  #     - '5672:5672'
+  rabbitmq:
+    container_name: queue
+    image: rabbitmq
+    networks:
+      itaic:
+        ipv4_address: 176.24.0.9
+    ports:
+      - '5672:5672'
   db-api:
     container_name: db-api
     image: itaic-api
@@ -31,9 +31,9 @@ services:
         ipv4_address: 176.24.0.3
     ports:
       - '8000:8000'
-# networks:
-#   itaic:
-#     driver: bridge
-#     ipam:
-#       config:
-#         - subnet: 176.24.0.0/24
+networks:
+  itaic:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 176.24.0.0/24

@@ -8,7 +8,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
 	"github.com/jmlattanzi/itaic-backend/itaic/pc"
 	"github.com/stretchr/testify/assert"
@@ -16,9 +15,6 @@ import (
 	"goji.io/pat"
 	"google.golang.org/api/option"
 )
-
-var ctx context.Context
-var client *firestore.Client
 
 func Router() *goji.Mux {
 	ctx := context.Background()
