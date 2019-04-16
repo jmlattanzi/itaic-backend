@@ -14,3 +14,9 @@ This is still very early in development and is setup as such, so take all the co
 3. Finish Compose file
 4. Build gateway
 5. Build Jenkins pipeline (?)
+
+## Structure
+
+I am constantly tweaking the structure of this application, but for now the current architecture is laid out as such:
+
+![alt text](https://s3-us-west-1.amazonaws.com/itaic/Service+diagram.png)
